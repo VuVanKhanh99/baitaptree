@@ -1,23 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useCallback, useState } from "react";
+import FiltersAction from "./components/Filters";
+import TreesSelect from "./components/TreesSelect";
+import { useStyles } from "./styles";
 
 function App() {
+  const classes = useStyles();
+  const [selectedPath, setSelectedPath] = useState([]);
+  const [nodeAdd, setNodeAdd] = useState("");
+
+  const handleGetSelected = useCallback((arrayNode) => {
+    setSelectedPath(arrayNode);
+  }, []);
+
+  const handleSetNodeAdd = useCallback((val) => setNodeAdd(val), []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={classes.rootApp}>
+      <FiltersAction
+        selectedPath={selectedPath}
+        setNodeAdd={handleSetNodeAdd}
+      />
+      <TreesSelect
+        nodeAdd={nodeAdd}
+        handleGetPath={handleGetSelected}
+        selectedPath={selectedPath}
+        setNodeAdd={handleSetNodeAdd}
+      />
     </div>
   );
 }
