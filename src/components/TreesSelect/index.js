@@ -47,17 +47,54 @@ export default function RecursiveTreeView(props) {
 
   const handleAddItem = useCallback((nodeAdd, dataNodes, selectedPath) => {
     const direction = getDirectionArray(dataNodes, selectedPath);
-    const newData = update(dataNodes, direction, (a) => {
-      a.children = (a?.children || []).concat({
+
+    let newData;
+    if (direction) {
+      newData = update(dataNodes, direction, (a) => {
+        //console.log("3343", a);
+        a.children = (a?.children || []).concat({
+          id: uuidv4(),
+          name: nodeAdd,
+          childs: a.childs.concat(nodeAdd),
+          product: "",
+        });
+        return a;
+      });
+    } else {
+      newData = cloneDeep(dataNodes);
+      newData.children = (newData?.children || []).concat({
         id: uuidv4(),
         name: nodeAdd,
-        childs: a.childs.concat(nodeAdd),
+        childs: newData.childs.concat(nodeAdd),
         product: "",
       });
-      return a;
-    });
+    }
     setData(newData);
-    props.setNodeAdd("");
+    props.handleGetPath("");
+  }, []);
+
+  const handleDelete = useCallback((childs, dataNodes) => {
+    const direction = getDirectionArray(dataNodes, cloneDeep(childs));
+    if (!direction) {
+      return setData({});
+    }
+    let newData;
+    const splitPath = direction.split(".");
+    const childPath = splitPath.pop();
+    if (splitPath.length !== 0) {
+      newData = update(dataNodes, splitPath.join("."), (a) => {
+        console.log("123", dataNodes, direction);
+        a.children = (a?.children || []).filter(
+          (_, index) => index !== Number(childPath.slice(-2, -1))
+        );
+        return a;
+      });
+    } else {
+      newData = dataNodes;
+      delete newData.children;
+    }
+    setData(newData);
+    handleGetPathTree("");
   }, []);
 
   useEffect(() => {
@@ -83,7 +120,12 @@ export default function RecursiveTreeView(props) {
                   <p className={classes.productView}>{nodes.product}</p>
                   <div className={classes.actionsRow}>
                     <Edit style={{ textAlign: "left" }} />
-                    <Delete style={{ textAlign: "right" }} />
+                    <Delete
+                      style={{ textAlign: "right" }}
+                      onClick={() =>
+                        handleDelete(nodes.childs, cloneDeep(data))
+                      }
+                    />
                   </div>
                 </div>
               </div>

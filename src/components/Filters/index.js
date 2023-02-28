@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import { useStyles } from "./styles";
 import { Button, Grid } from "@material-ui/core";
@@ -6,6 +6,11 @@ import { Button, Grid } from "@material-ui/core";
 function FiltersAction(props) {
   const classes = useStyles();
   const [textAdd, setTextAdd] = useState("");
+
+  useEffect(() => {
+    setTextAdd(props.nodeAdd);
+  }, [props.nodeAdd]);
+
   return (
     <div className={classes.containerActions}>
       <Grid container>

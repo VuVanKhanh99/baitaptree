@@ -19,6 +19,7 @@ function App() {
       <FiltersAction
         selectedPath={selectedPath}
         setNodeAdd={handleSetNodeAdd}
+        nodeAdd={nodeAdd}
       />
       <TreesSelect
         nodeAdd={nodeAdd}
