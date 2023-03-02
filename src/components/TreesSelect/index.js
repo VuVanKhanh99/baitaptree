@@ -10,14 +10,15 @@ import { data as nodeDatas } from "./data";
 import { useStyles } from "./styles";
 import { cloneDeep, update } from "lodash";
 import { v4 as uuidv4 } from "uuid";
+import { Alert, Snackbar } from "@mui/material";
 
 export default function RecursiveTreeView(props) {
   const classes = useStyles();
   const [data, setData] = useState(nodeDatas);
+  const [showError, setShowError] = useState(false);
+
   const handleGetPathTree = useCallback((path) => {
-    if (path) {
-      props.handleGetPath(path);
-    }
+    props.handleGetPath(path);
   }, []);
 
   const getDirectionArray = (nodes, path) => {
@@ -51,7 +52,6 @@ export default function RecursiveTreeView(props) {
     let newData;
     if (direction) {
       newData = update(dataNodes, direction, (a) => {
-        //console.log("3343", a);
         a.children = (a?.children || []).concat({
           id: uuidv4(),
           name: nodeAdd,
@@ -70,7 +70,7 @@ export default function RecursiveTreeView(props) {
       });
     }
     setData(newData);
-    props.handleGetPath("");
+    props.setNodeAdd("");
   }, []);
 
   const handleDelete = useCallback((childs, dataNodes) => {
@@ -83,7 +83,6 @@ export default function RecursiveTreeView(props) {
     const childPath = splitPath.pop();
     if (splitPath.length !== 0) {
       newData = update(dataNodes, splitPath.join("."), (a) => {
-        console.log("123", dataNodes, direction);
         a.children = (a?.children || []).filter(
           (_, index) => index !== Number(childPath.slice(-2, -1))
         );
@@ -93,15 +92,47 @@ export default function RecursiveTreeView(props) {
       newData = dataNodes;
       delete newData.children;
     }
-    setData(newData);
     handleGetPathTree("");
+    setData(newData);
+  }, []);
+
+  const checkExist = useCallback((nodeAdd, dataNodes) => {
+    let arrCheckExist = false;
+    const checkItemExist = (nodes) => {
+      if (arrCheckExist) return;
+      if (!nodes.children) return;
+      nodes.children.map((item) => {
+        if (item.name === nodeAdd) {
+          arrCheckExist = true;
+        } else {
+          checkItemExist(item);
+        }
+      });
+      return arrCheckExist;
+    };
+    return checkItemExist(dataNodes);
   }, []);
 
   useEffect(() => {
     if (props.nodeAdd && props.selectedPath?.length) {
+      const isExist = checkExist(props.nodeAdd.trim(), cloneDeep(data));
+      if (isExist) {
+        return setShowError(true);
+      }
       handleAddItem(props.nodeAdd, cloneDeep(data), props.selectedPath);
     }
   }, [props.nodeAdd, props.selectedPath]);
+
+  useEffect(() => {
+    if (props.selectedPath) {
+      const currentNode = document.getElementById(
+        cloneDeep(props.selectedPath).pop()
+      );
+      if (currentNode) {
+        currentNode.click();
+      }
+    }
+  }, [props.selectedPath]);
 
   const renderTree = useCallback(
     (nodes) => (
@@ -111,22 +142,29 @@ export default function RecursiveTreeView(props) {
         label={
           <FormControlLabel
             control={
-              <div
-                className={classes.rowCategory}
-                onClick={() => handleGetPathTree(nodes.childs)}
-              >
-                <p>{nodes.name}</p>
+              <div className={classes.rowCategory} id={nodes.name}>
+                <p
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGetPathTree(nodes.childs);
+                  }}
+                >
+                  {nodes.name}
+                </p>
                 <div className={classes.rightViewActions}>
                   <p className={classes.productView}>{nodes.product}</p>
-                  <div className={classes.actionsRow}>
-                    <Edit style={{ textAlign: "left" }} />
-                    <Delete
-                      style={{ textAlign: "right" }}
-                      onClick={() =>
-                        handleDelete(nodes.childs, cloneDeep(data))
-                      }
-                    />
-                  </div>
+                  {nodes.childs.length > 1 && (
+                    <div className={classes.actionsRow}>
+                      <Edit style={{ textAlign: "left" }} />
+                      <Delete
+                        style={{ textAlign: "right" }}
+                        onClick={() => {
+                          handleGetPathTree([]);
+                          handleDelete(nodes.childs, cloneDeep(data));
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             }
@@ -146,12 +184,25 @@ export default function RecursiveTreeView(props) {
   return (
     <div className={classes.treeContainer}>
       <TreeView
-        defaultCollapseIcon={<IndeterminateCheckBoxOutlined />}
         defaultExpanded={["0"]}
+        defaultCollapseIcon={<IndeterminateCheckBoxOutlined />}
         defaultExpandIcon={<AddBoxOutlined />}
       >
         {renderTree(data)}
       </TreeView>
+      <Snackbar
+        open={showError}
+        autoHideDuration={4000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{
+          horizontal: "center",
+          vertical: "top",
+        }}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          The name tree item is exist!
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

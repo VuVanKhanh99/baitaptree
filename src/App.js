@@ -7,6 +7,7 @@ function App() {
   const classes = useStyles();
   const [selectedPath, setSelectedPath] = useState([]);
   const [nodeAdd, setNodeAdd] = useState("");
+  const [nodeItem, setNodeItem] = useState([]);
 
   const handleGetSelected = useCallback((arrayNode) => {
     setSelectedPath(arrayNode);
@@ -20,6 +21,7 @@ function App() {
         selectedPath={selectedPath}
         setNodeAdd={handleSetNodeAdd}
         nodeAdd={nodeAdd}
+        setNodeItem={handleGetSelected}
       />
       <TreesSelect
         nodeAdd={nodeAdd}

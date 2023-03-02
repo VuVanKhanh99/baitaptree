@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import { useStyles } from "./styles";
 import { Button, Grid } from "@material-ui/core";
@@ -10,6 +10,10 @@ function FiltersAction(props) {
   useEffect(() => {
     setTextAdd(props.nodeAdd);
   }, [props.nodeAdd]);
+
+  const handleSetNodeItem = useCallback((nodePaths, indexItem) => {
+    props.setNodeItem(nodePaths.slice(0, indexItem + 1));
+  }, []);
 
   return (
     <div className={classes.containerActions}>
@@ -32,10 +36,18 @@ function FiltersAction(props) {
           <div className={classes.containerPath}>
             {props.selectedPath?.length ? (
               props.selectedPath
-                .map((selected) => (
-                  <Button variant="contained" className={classes.chipItem}>
-                    {selected}
-                  </Button>
+                .map((selected, index) => (
+                  <React.Fragment key={index}>
+                    <Button
+                      variant="contained"
+                      className={classes.chipItem}
+                      onClick={() => {
+                        handleSetNodeItem(props.selectedPath, index);
+                      }}
+                    >
+                      {selected}
+                    </Button>
+                  </React.Fragment>
                 ))
                 .reduce((prev, curr) => {
                   return !prev

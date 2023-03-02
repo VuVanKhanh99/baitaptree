@@ -16,13 +16,13 @@ export const useStyles = makeStyles(() =>
       alignItems: "center",
     },
     rightViewActions: {
-      width: "70%",
+      width: "20%",
       display: "flex",
-      justifyContent: "flex-end",
+      justifyContent: "flex-start",
       alignItems: "center",
     },
     actionsRow: {
-      width: "8%",
+      width: "50%",
       display: "flex",
       justifyContent: "space-between",
       verticalAlign: "baseline",

@@ -10,13 +10,13 @@ export const useStyles = makeStyles(() =>
     },
     containerActions: {
       width: "100%",
-      "& .MuiOutlinedInput-input": {
-        padding: "10px 13px !important",
-      },
     },
     inputSearch: {
       width: "100%",
       outline: "none",
+      "&.MuiOutlinedInput-input": {
+        padding: "10px 13px !important",
+      },
     },
     displayPath: {
       border: "1px solid #000",
